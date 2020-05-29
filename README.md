@@ -1,6 +1,6 @@
 # Chooser
 Reference taken from  https://github.com/DavidSousa/cordova-plugin-chooser#v1.0.
-But few thing modied.
+But few thing modified.
 ## Overview
 
 File chooser plugin for Cordova.

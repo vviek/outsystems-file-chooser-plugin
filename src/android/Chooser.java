@@ -6,7 +6,9 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.util.Base64;
+import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -109,34 +111,37 @@ public class Chooser extends CordovaPlugin {
 	private static JSONObject getFileFromUri (ContentResolver contentResolver, Uri uri) throws JSONException {
 		JSONObject result = new JSONObject();
 
-		String name = Chooser.getDisplayName(contentResolver, uri);
+		String[] fileDetails = Chooser.getDisplayName(contentResolver, uri);
 
 		String mediaType = contentResolver.getType(uri);
 		if (mediaType == null || mediaType.isEmpty()) {
 			mediaType = "application/octet-stream";
 		}
 
-		result.put("name", name);
+		result.put("name", fileDetails[0]);
 		result.put("mimeType", mediaType);
 		result.put("uri", uri.toString());
+		result.put("filesize", fileDetails[1]);
 		return result;
 	}
 	
-	/** @see https://stackoverflow.com/a/23270545/459881 */
-	private static String getDisplayName (ContentResolver contentResolver, Uri uri) {
-		String[] projection = {MediaStore.MediaColumns.DISPLAY_NAME};
+
+	private static String[] getDisplayName (ContentResolver contentResolver, Uri uri) {
+		String[] projection = {MediaStore.MediaColumns.DISPLAY_NAME,MediaStore.MediaColumns.SIZE};
 		Cursor metaCursor = contentResolver.query(uri, projection, null, null, null);
+
 
 		if (metaCursor != null) {
 			try {
 				if (metaCursor.moveToFirst()) {
-					return metaCursor.getString(0);
+					Log.e("ImageFileSze",":"+metaCursor.getString(0)+":"+metaCursor.getString(1));
+					return new String[]{metaCursor.getString(0),metaCursor.getString(1)};
 				}
 			} finally {
 				metaCursor.close();
 			}
 		}
 
-		return "File";
+		 return new String[]{"File","0"};
 	}
 }
